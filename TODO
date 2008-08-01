@@ -1,0 +1,14 @@
+* Add is.gd (http://is.gd/api_info.php) instead of tinyurl.
+* Deal with passworded urls without dying.
+* Deal with more mimetypes
+  * PDF?
+  * Atom (!)/RSS
+  * JPEG (Comment? EXIF? Resolution?)
+  * GIF (Comment? Resolution?)
+  * text/plain (grab the first line?)
+* Find a longer summary for the atom feed (look for the first <p>?)
+* Let people comment on a url ala "chump"
+* Figure out a useragent
+* Clean the code up!
+* Fix the bot code up
+* Add a config file for everything
