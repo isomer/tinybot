@@ -2,15 +2,18 @@ import time
 import cgi
 import urllib
 
+import tiny_settings
+
 def generate_atom(fname,entries):
-	output=open("/home/perry/public_html/tinybot/%s.atom" % fname,"w")
+	output=open(tiny_settings.atomdir + "%s.atom" % fname, "w")
 	print >>output,"""<?xml version="1.0" encoding="utf-8"?>
 
 	<feed xmlns="http://www.w3.org/2005/Atom">
 	   <title>Tinybot URL harvester</title>
-	   <link href="http://coders.meta.net.nz/~perry/tinybot/%(fname)s.atom" rel="self"/>
+	   <link href="%(dir)s%(fname)s.atom" rel="self"/>
 	   <updated>%(now)s</updated>
 	   <id>http://coders.meta.net.nz/~perry/tinybot/</id>""" % {
+        "dir" : tiny_settings.atomdir_url,
 		"now" : time.strftime("%Y-%m-%dT%H:%M:%SZ"),
 		"fname" : urllib.quote(fname)
 	}
