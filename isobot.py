@@ -85,13 +85,12 @@ if __name__ == '__main__':
     f = IsoBotFactory()
 
     # connect factory to this host and port
-    #reactor.connectTCP("eu.undernet.org", 6667, f)
+    reactor.connectTCP("eu.undernet.org", 6667, f)
     #reactor.connectTCP("amsterdam2.nl.eu.undernet.org", 6667, f)
     #reactor.connectTCP("stockholm.se.eu.undernet.org", 6667, f)
     #reactor.connectTCP(random.choice(
     #		["london2.uk.eu.undernet.org","london.uk.eu.undernet.org"]),
     #	 6667, f)
-    reactor.connectTCP("199.29.143.51",23456, f)
 
     # run bot
     reactor.run()
