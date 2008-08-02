@@ -1,3 +1,16 @@
+import random
+
+# irc server (servername, ip) to try connecting to
+# TODO - can't figure out how to get twisted connectTCP to fall back to
+# another if the first fails...
+ircserver = ("eu.undernet.org", 6667)
+# ircserver = ("amsterdam2.nl.eu.undernet.org", 6667)
+# ircserver = ("stockholm.se.eu.undernet.org", 6667)
+# ircserver = (random.choice(["london2","london"]) + ".uk.eu.undernet.org", 6667)
+
+# what name to try to use when connected
+nickname = 'tinybot-test'
+
 # "channelname": "key" (or None)
 channels = {
     'tinybottest': None,

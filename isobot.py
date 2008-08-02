@@ -6,7 +6,6 @@ from twisted.internet import reactor, protocol
 # system imports
 import time, sys
 import re
-import random
 import urllib
 
 import tiny_settings
@@ -15,7 +14,7 @@ import tinyurl
 class IsoBot(irc.IRCClient):
     
     def __init__(self):
-        self.nickname = "tinybot"
+        self.nickname = tiny_settings.nickname
         reactor.callLater(30,self.ping_pong)
 
     def ping_pong(self):
@@ -34,7 +33,7 @@ class IsoBot(irc.IRCClient):
         """Called when bot has succesfully signed on to server."""
         if tiny_settings.x_login:
             self.msg("x@channels.undernet.org", x_login)
-        self.mode(self.nickname,'+','ix')
+        self.mode(self.nickname, '+', 'ix')
         for channel, key in tiny_settings.channels.items():
             self.join("#" + channel, key)
 
@@ -51,21 +50,41 @@ class IsoBot(irc.IRCClient):
     def privmsg(self, user, channel, msg):
         """This will get called when the bot receives a message."""
         user = user.split('!', 1)[0]
-        print user,"PRIVMSG",channel,msg
-        target=channel
-        if target==self.nickname:
-            target=user
-        m=tinyurl.tiny(user,channel,msg)
-        if m is not None: 
-            while "\n" in m or "\r" in m:
-                m=m.split("\r",1)[0]
-                m=m.split("\n",1)[0]
-            self.say(channel,m)
-            print user,"PRIVMSG",channel,m
-        if msg=="!tinybot":
-            m=tinyurl.find_urls_by_channel(channel)
+        print user, "PRIVMSG", channel, msg
+        if channel == 'AUTH' or user.lower().endswith("undernet.org"):
+            # server message during connect
+            return
+        target = channel # where to send reply
+        reply = None
+        if target == self.nickname:
+            # this message was sent to us rather than a channel
+            target = user
+            if msg == 'help':
+                reply = 'type "!tinybot" in a channel to see recently pasted links\n'
+                url = tiny_settings.atomdir_url
+                reply += 'see %s%%23$channel.atom for a full list' % url
+                reply += ' (obviously replacing "$channel" with the appropriate name)'
+            else:
+                reply = 'huh? try "help"'
+        else:
+            # see if this message should get a response
+            reply = tinyurl.tiny(user, channel, msg)
+            if reply is not None: 
+                # get 1st line only, if we have multi-line response
+                while "\n" in reply or "\r" in reply:
+                    reply=reply.split("\r",1)[0]
+                    reply=reply.split("\n",1)[0]
+        if reply is not None: 
+            print "PRIVMSG reply", target, reply
+            for line in reply.split("\n"):
+                # channel messages will already be set to single line (above),
+                # so we'll only send multiline responses to a user
+                self.msg(target, line)
+        if msg == "!tinybot" and target != user:
+            # posted to a channel, reply to user
+            m = tinyurl.find_urls_by_channel(channel) or ("no recent links",)
             for i in m:
-                self.say(user,i)
+                self.msg(user, i)
 
 class IsoBotFactory(protocol.ClientFactory):
     # the class of the protocol to build when new connection is made
@@ -89,12 +108,9 @@ if __name__ == '__main__':
     f = IsoBotFactory()
 
     # connect factory to this host and port
-    reactor.connectTCP("eu.undernet.org", 6667, f)
-    #reactor.connectTCP("amsterdam2.nl.eu.undernet.org", 6667, f)
-    #reactor.connectTCP("stockholm.se.eu.undernet.org", 6667, f)
-    #reactor.connectTCP(random.choice(
-    #		["london2.uk.eu.undernet.org","london.uk.eu.undernet.org"]),
-    #	 6667, f)
+    name, ip = tiny_settings.ircserver
+    print "connecting to %s:%d" % (name, ip)
+    reactor.connectTCP(name, ip, f)
 
     # run bot
     reactor.run()

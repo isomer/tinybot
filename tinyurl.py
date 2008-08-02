@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import re
-import urllib
+import urllib2
 import time
 import htmlentitydefs
 import atom
@@ -49,10 +49,13 @@ def duration(x):
         return "%ds" % (x%60)
 
 def fetch_url(url):
-    u = urllib.FancyURLopener()
-    #u.addheader('User-Agent','Mozilla/4.0 (compatible; Tinier; Linux; Parsing title tags for IRC)')
-    u.addheader("Accept","text/html")
-    return u.open(url)
+    """returns a file-like handle that can be read from"""
+    u = urllib2.Request(url)
+    # wikimedia detects and blocks requests from urllib's default user-agent
+    u.add_header('User-Agent','Mozilla/4.0 (compatible; Tinier; Linux; Parsing title tags for IRC)')
+    # can add other things to the request before we send it... eg set_proxy()
+    u.add_header("Accept","text/html")
+    return urllib2.urlopen(u)
 
 
 def get_real_url(url):
@@ -96,39 +99,41 @@ def tiny(user,channel,msg):
             realurl[x]=x
             return x
         try:
-            #f=urllib.urlopen("http://tinyurl.com/create.php?url="+x)
-            f=fetch_url("http://tinyurl.com/create.php?url="+x)
-            r=f.read()
+            f = fetch_url("http://tinyurl.com/create.php?url="+x)
+            r = f.read()
             a = re.match('.*href="(http://tiny.*?)"',r, re.DOTALL)
             tinycache[x]=a.groups()[0]
             realurl[a.groups()[0]]=x
         except IOError,e:
-            tinycache[x]=str(e)
+            tinycache[x] = e.strerror
 
         return tinycache[x]
 
-    def findsummary(x):
-        if x in summarycache:
-            return summarycache[x]
-        a = re.match("http://en.wikipedia.org/wiki/(.*)$",x)
-        if a:
-            summarycache[x]=urllib.unquote(a.groups()[0]).replace("_"," ").replace("#",": ")
+    def findsummary(url):
+        """find title or short summary to print next to the url"""
+        if url in summarycache:
+            return summarycache[url]
+        match = re.match("http://en.wikipedia.org/wiki/(.*)$", url)
+        if match:
+            pagename = urllib2.unquote(match.group(1))
+            pagename = pagename.replace("_"," ").replace("#",": ")
+            summarycache[url] = pagename
         else:
             try:
-                page=fetch_url(x).read(64*1024)
+                page=fetch_url(url).read(64*1024)
                 a = re.match('.*< *title[^>]*>(.*)</ *title *>.*',page, re.DOTALL| re.IGNORECASE)
                 if a:
-                    summarycache[x]=unhtmlspecialchars(a.groups()[0].strip())
+                    summarycache[url]=unhtmlspecialchars(a.group(1).strip())
                     # Apply as many cleanups as possible
                     for s,r in cleanups:
-                        summarycache[x] = \
-                            re.sub(s,r,summarycache[x])
+                        summarycache[url] = \
+                            re.sub(s,r,summarycache[url])
                 else:
                     #print "No title tag?",`page`
-                    summarycache[x]=None
+                    summarycache[url] = None
             except IOError,e:
-                summarycache[x]=str(e)
-        return summarycache[x]
+                summarycache[url] = e.strerror
+        return summarycache[url]
 
     origmsg=msg
     m=""
