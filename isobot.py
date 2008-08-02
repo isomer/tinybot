@@ -32,7 +32,7 @@ class IsoBot(irc.IRCClient):
     def signedOn(self):
         """Called when bot has succesfully signed on to server."""
         if tiny_settings.x_login:
-            self.msg("x@channels.undernet.org", x_login)
+            self.msg("x@channels.undernet.org", tiny_settings.x_login)
         self.mode(self.nickname, '+', 'ix')
         for channel, key in tiny_settings.channels.items():
             self.join("#" + channel, key)

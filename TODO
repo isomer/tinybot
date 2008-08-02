@@ -6,6 +6,7 @@
   * JPEG (Comment? EXIF? Resolution?)
   * GIF (Comment? Resolution?)
   * text/plain (grab the first line?)
+  * YouTube videos (title, duration, rating/views, tags?)
 * Find a longer summary for the atom feed (look for the first <p>?)
 * Let people comment on a url ala "chump"
 * Figure out a useragent
