@@ -80,10 +80,9 @@ def tiny(user,channel,msg):
         print "tinyurling",`x`
         if x in tinycache:
             return tinycache[x]
-        if x.startswith("tinyurl.com"):
-            realurl[x]=x
-            return x
-        if x.startswith("preview.tinyurl.com"):
+        if x.startswith("tinyurl.com")
+          or x.startswith("preview.tinyurl.com")
+          :
             realurl[x]=x
             return x
         try:
