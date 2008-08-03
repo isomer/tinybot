@@ -57,15 +57,8 @@ class IsoBot(irc.IRCClient):
         target = channel # where to send reply
         reply = None
         if target == self.nickname:
-            # this message was sent to us rather than a channel
             target = user
-            if msg == 'help':
-                reply = 'type "!tinybot" in a channel to see recently pasted links\n'
-                url = tiny_settings.atomdir_url
-                reply += 'see %s%%23$channel.atom for a full list' % url
-                reply += ' (obviously replacing "$channel" with the appropriate name)'
-            else:
-                reply = 'huh? try "help"'
+            reply = 'sorry, I\'m just a bot'
         else:
             # see if this message should get a response
             reply = tinyurl.tiny(user, channel, msg)
@@ -80,11 +73,6 @@ class IsoBot(irc.IRCClient):
                 # channel messages will already be set to single line (above),
                 # so we'll only send multiline responses to a user
                 self.msg(target, line)
-        if msg == "!tinybot" and target != user:
-            # posted to a channel, reply to user
-            m = tinyurl.find_urls_by_channel(channel) or ("no recent links",)
-            for i in m:
-                self.msg(user, i)
 
 class IsoBotFactory(protocol.ClientFactory):
     # the class of the protocol to build when new connection is made

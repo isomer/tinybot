@@ -73,18 +73,6 @@ def get_summary(url):
     else:
         return realurl
 
-def find_urls_by_channel(channel):
-    ret=[]
-    for url,(ts,who) in timeline[channel].items():
-        ret.append((ts,url,who))
-    ret.sort()
-    ret=ret[-5:] # grab only the 5 most recent
-    return [
-        "(%s ago) <%s> %s [%s]" % (duration(time.time()-ts),who,url,get_summary(url))
-        for (ts,url,who) in ret
-        ]
-        
-
 def tiny(user,channel,msg):
     if channel not in timeline:
         timeline[channel]={}
