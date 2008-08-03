@@ -113,8 +113,7 @@ def tiny(user,channel,msg):
                     summarycache[url]=unhtmlspecialchars(a.group(1).strip())
                     # Apply as many cleanups as possible
                     for s,r in cleanups:
-                        summarycache[url] = \
-                            re.sub(s,r,summarycache[url])
+                        summarycache[url] = re.sub(s,r,summarycache[url])
                 else:
                     #print "No title tag?",`page`
                     summarycache[url] = None
