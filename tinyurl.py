@@ -80,8 +80,8 @@ def tiny(user,channel,msg):
         print "tinyurling",`x`
         if x in tinycache:
             return tinycache[x]
-        if x.startswith("tinyurl.com")
-          or x.startswith("preview.tinyurl.com")
+        if x.startswith("tinyurl.com") \
+          or x.startswith("preview.tinyurl.com") \
           :
             realurl[x]=x
             return x
@@ -193,7 +193,8 @@ def tiny(user,channel,msg):
             (ts,get_summary(url),who,get_real_url(url),url,build_atom_summary(who,url))
             )
     atomitems.sort()
-    atom.generate_atom(channel,atomitems)
+    atomitems.reverse()
+    atom.generate_atom(channel,atomitems[:30])
         
     return msg
 
