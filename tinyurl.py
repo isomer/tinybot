@@ -80,9 +80,8 @@ def tiny(user,channel,msg):
         print "tinyurling",`x`
         if x in tinycache:
             return tinycache[x]
-        if x.startswith("tinyurl.com")
-          or x.startswith("preview.tinyurl.com")
-          :
+        if x.startswith("tinyurl.com") \
+          or x.startswith("preview.tinyurl.com"):
             realurl[x]=x
             return x
         try:
@@ -141,7 +140,7 @@ def tiny(user,channel,msg):
         tinied = tinyurl(url)
         if frag:
             tinied += frag
-            b += frag
+            url += frag
         if len(tinied) <= len(url): 
             if starttext:
                 bits = bits+[starttext]
@@ -207,4 +206,3 @@ if __name__=="__main__":
     print tiny("me","#channel","http://foss-means-business.org/Image:IMG_0172.JPG")
     print tiny("me","#channel","http://en.wikipedia.org/wiki/Main_Page")
     print tiny("me","#channel","http://www.trademe.co.nz/Home-living/Lifestyle/Wine-food/Food/auction-165301499.htm")
-    print find_urls_by_channel("#channel")
