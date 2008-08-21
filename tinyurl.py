@@ -13,7 +13,7 @@ summarycache={} # url => summary
 timeline={} # channel => tinyurl => (timestamp,who)
 realurl={} # tinyurl => url
 
-debug = 1
+debug = 0
 
 def duration(x):
     ret=""
@@ -45,8 +45,9 @@ def get_real_url(url):
 
 def get_summary(url):
     realurl = get_real_url(url)
-    if realurl in summarycache:
-        return summarycache[realurl]
+    ret=summarycache[realurl]
+    if ret is not None:
+        return ret
     else:
         return realurl
 
