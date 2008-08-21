@@ -19,6 +19,8 @@ def generate_atom(fname,entries):
 	}
 
 	for (updatedts,title,author,url,id,summary) in entries:
+		if title == None:
+			title = ""
 		print >>output,"""
 		  <entry>
 		     <title>%(title)s</title>
