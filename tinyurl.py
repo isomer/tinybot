@@ -4,38 +4,16 @@ import urllib2
 import time
 import htmlentitydefs
 import atom
+import websites
+import filetypes
+import os
 
 tinycache={}    # url => tinyurl
 summarycache={} # url => summary
 timeline={} # channel => tinyurl => (timestamp,who)
 realurl={} # tinyurl => url
 
-cleanups = [
-    (r"\n",r" "),
-    (r"\r",r" "),
-    (r"YouTube - (.*)",r"\1"),
-    (r"(.*) - NZ Herald.*",r"\1"),
-    (r"Slashdot \| (.*)",r"\1"),
-    (r"(.*) \| NEWS.com.au",r"\1"),
-    (r"(.*) - Yahoo! News",r"\1"),
-    (r"(.*) - TradeMe.co.nz - New Zealand",r"\1"),
-    (r"(.*) *- New Zealand's source for.* on Stuff.co.nz}",r"\1"),
-]
-
-def unhtmlspecialchars(x):
-    "Remove &entities; from HTML"
-    ret=u""
-    x=x.decode("utf8")
-    while 1:
-        s = re.match("(.*?)&(#?[A-Za-z0-9]+);(.*)",x)
-        if not s:
-            return (ret+x).encode("utf8")
-        lhs,entity,rhs = s.groups()
-        if entity.startswith("#"):
-            ret=ret+lhs+unichr(int(entity[1:]))
-        else:
-            ret=ret+lhs+htmlentitydefs.entitydefs[entity].decode("latin1")
-        x=rhs
+debug = 1
 
 def duration(x):
     ret=""
@@ -67,9 +45,8 @@ def get_real_url(url):
 
 def get_summary(url):
     realurl = get_real_url(url)
-    ret=summarycache[realurl]
-    if ret is not None:
-        return ret
+    if realurl in summarycache:
+        return summarycache[realurl]
     else:
         return realurl
 
@@ -85,14 +62,17 @@ def tiny(user,channel,msg):
           :
             realurl[x]=x
             return x
-        try:
-            f = fetch_url("http://tinyurl.com/create.php?url="+x)
-            r = f.read()
-            a = re.match('.*href="(http://tiny.*?)"',r, re.DOTALL)
-            tinycache[x]=a.groups()[0]
-            realurl[a.groups()[0]]=x
-        except IOError,e:
-            tinycache[x] = e.strerror
+        if debug != 1:
+            try:
+                f = fetch_url("http://tinyurl.com/create.php?url="+x)
+                r = f.read()
+                a = re.match('.*href="(http://tiny.*?)"',r, re.DOTALL)
+                tinycache[x]=a.groups()[0]
+                realurl[a.groups()[0]]=x
+            except IOError,e:
+                tinycache[x] = e.strerror
+	else:
+	    tinycache[x]=x
 
         return tinycache[x]
 
@@ -100,25 +80,20 @@ def tiny(user,channel,msg):
         """find title or short summary to print next to the url"""
         if url in summarycache:
             return summarycache[url]
-        match = re.match("http://en.wikipedia.org/wiki/(.*)$", url)
-        if match:
-            pagename = urllib2.unquote(match.group(1))
-            pagename = pagename.replace("_"," ").replace("#",": ")
-            summarycache[url] = pagename
-        else:
-            try:
-                page=fetch_url(url).read(64*1024)
-                a = re.match('.*< *title[^>]*>(.*)</ *title *>.*',page, re.DOTALL| re.IGNORECASE)
-                if a:
-                    summarycache[url]=unhtmlspecialchars(a.group(1).strip())
-                    # Apply as many cleanups as possible
-                    for s,r in cleanups:
-                        summarycache[url] = re.sub(s,r,summarycache[url])
-                else:
-                    #print "No title tag?",`page`
-                    summarycache[url] = None
-            except IOError,e:
-                summarycache[url] = e.strerror
+
+	try:
+		page=fetch_url(url).read(64*1024)
+		summary = websites.get_summary(url, page)
+		if summary is None:
+			fname = os.tmpnam()
+			fp = open(fname, "w")
+			fp.write(page)
+			fp.close()
+			summary = filetypes.get_summary(url, fname)
+		summarycache[url] = summary
+	except IOError,e:
+		summarycache[url] = e.strerror
+
         return summarycache[url]
 
     origmsg=msg
@@ -141,7 +116,7 @@ def tiny(user,channel,msg):
         tinied = tinyurl(url)
         if frag:
             tinied += frag
-            b += frag
+            url += frag
         if len(tinied) <= len(url): 
             if starttext:
                 bits = bits+[starttext]
@@ -201,6 +176,9 @@ def tiny(user,channel,msg):
 
 if __name__=="__main__":
     print tiny("me","#channel","http://en.wikipedia.org/wiki/Puppet_state#The_first_puppet_states")
+    print tiny("me","#channel","http://www.stuff.co.nz/4664076a28.html")
+    print tiny("me","#channel","http://www.flickr.com/photos/tonyandrach/2712775977/in/set-72157606435991911")
+    print tiny("me","#channel","http://porter.net.nz/~alastair/trace.txt")
     print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
     print tiny("me","#channel","http://azarask.in/blog/post/not-the-users-fault-manifesto/")
     print tiny("me","#channel","http://slashdot.org this is a test http://example.org http://www.news.com.au/heraldsun/story/0,21985,23245649-5005961,00.html")
@@ -208,4 +186,4 @@ if __name__=="__main__":
     print tiny("me","#channel","http://foss-means-business.org/Image:IMG_0172.JPG")
     print tiny("me","#channel","http://en.wikipedia.org/wiki/Main_Page")
     print tiny("me","#channel","http://www.trademe.co.nz/Home-living/Lifestyle/Wine-food/Food/auction-165301499.htm")
-    print find_urls_by_channel("#channel")
+
