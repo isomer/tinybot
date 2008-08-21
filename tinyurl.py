@@ -1,12 +1,14 @@
 #!/usr/bin/python
 import re
+import os
 import urllib2
 import time
 import htmlentitydefs
+import tempfile
+
 import atom
 import websites
 import filetypes
-import os
 
 tinycache={}    # url => tinyurl
 summarycache={} # url => summary
@@ -85,10 +87,9 @@ def tiny(user,channel,msg):
 		page=fetch_url(url).read(64*1024)
 		summary = websites.get_summary(url, page)
 		if summary is None:
-			fname = os.tmpnam()
-			fp = open(fname, "w")
-			fp.write(page)
-			fp.close()
+			fd, fname = tempfile.mkstemp()
+			os.write(fd, page)
+			os.close(fd)
 			summary = filetypes.get_summary(url, fname)
 		summarycache[url] = summary
 	except IOError,e:
