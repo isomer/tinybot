@@ -20,7 +20,7 @@ channels = {
 x_login = None
 
 # where to write the files, one per channel (with a trailing slash)
-atomdir = "/home/perry/public_html/tinybot/"
+atomdir = "/home/alastair/"
 #atomdir = "/tmp/"
 
 # url to this directory (with a trailing slash)
