@@ -63,16 +63,17 @@ def tiny(user,channel,msg):
             return tinycache[x]
         if x.startswith("tinyurl.com") \
           or x.startswith("preview.tinyurl.com") \
+	  or x.startswith("is.gd") \
           :
             realurl[x]=x
             return x
         if debug != 1:
             try:
-                f = fetch_url("http://tinyurl.com/create.php?url="+x)
+	    	f = fetch_url("http://is.gd/api.php?longurl="+x)
                 r = f.read()
-                a = re.match('.*href="(http://tiny.*?)"',r, re.DOTALL)
-                tinycache[x]=a.groups()[0]
-                realurl[a.groups()[0]]=x
+		print "url:",`x`,"tinyurl:",`r`
+                tinycache[x]=r
+                realurl[r]=x
             except IOError,e:
                 tinycache[x] = e.strerror
 	else:
