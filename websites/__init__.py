@@ -19,7 +19,8 @@ cleanups = [
 
 for file in glob.glob("websites/*.py"):
 	if not file.endswith("__init__.py"):
-		x = __import__(file[:-2])
+		print "Loading",`file`,`file[:-3]`
+		x = __import__(file[:-3])
 		if "get_summary" in dir(x) and "website" in dir(x):
 			summary_generators[x.website]=x.get_summary
 
