@@ -136,18 +136,14 @@ def tiny(user,channel,msg):
     for i in bits: #(url,summary)
         if type(i)==type(""):
             m=m+i
-        elif i[1] is not None:
-            if i[0] not in timeline[channel]:
-                m=m+i[0]+" ["+i[1]+"]"
-                timeline[channel][i[0]]=(time.time(),user)
-            else:
-                m=m+"TIMELINE(%s ago by %s)" % (duration(time.time()-timeline[channel][i[0]][0]),timeline[channel][i[0]][1])
-        else:
-            if i[0] not in timeline[channel]:
-                m=m+i[0]
-                timeline[channel][i[0]]=(time.time(),user)
-            else:
-                m=m+"TIMELINE(%s ago by %s)" % (duration(time.time()-timeline[channel][i[0]][0]),i[0][1])
+	elif i[0] not in timeline[channel]:
+            timeline[channel][i[0]]=(time.time(),user)
+	    if i[1] is not None:
+	        m=m+i[0]+" ["+i[1]+"]"
+	    else:
+	        m=m+i[0]
+	else:
+	    m=m+"TIMELINE(%s ago by %s)" % (duration(time.time()-timeline[channel][i[0]][0]),timeline[channel][i[0]][1])
     if m==origmsg:
         return
     msg="<%s> %s" % (user,m)
@@ -183,10 +179,12 @@ def tiny(user,channel,msg):
 
 if __name__=="__main__":
     print tiny("me","#channel","http://twitter.com/revgeorge/statuses/884264710")
+    print tiny("him","#channel","http://twitter.com/revgeorge/statuses/884264710")
     print tiny("me","#channel","http://en.wikipedia.org/wiki/Puppet_state#The_first_puppet_states")
     print tiny("me","#channel","http://www.stuff.co.nz/4664076a28.html")
     print tiny("me","#channel","http://www.flickr.com/photos/tonyandrach/2712775977/in/set-72157606435991911")
     print tiny("me","#channel","http://porter.net.nz/~alastair/trace.txt")
+    print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
     print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
     print tiny("me","#channel","http://azarask.in/blog/post/not-the-users-fault-manifesto/")
     print tiny("me","#channel","http://slashdot.org this is a test http://example.org http://www.news.com.au/heraldsun/story/0,21985,23245649-5005961,00.html")
