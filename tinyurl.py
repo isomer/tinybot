@@ -182,6 +182,7 @@ def tiny(user,channel,msg):
 
 
 if __name__=="__main__":
+    print tiny("me","#channel","http://twitter.com/revgeorge/statuses/884264710")
     print tiny("me","#channel","http://en.wikipedia.org/wiki/Puppet_state#The_first_puppet_states")
     print tiny("me","#channel","http://www.stuff.co.nz/4664076a28.html")
     print tiny("me","#channel","http://www.flickr.com/photos/tonyandrach/2712775977/in/set-72157606435991911")
