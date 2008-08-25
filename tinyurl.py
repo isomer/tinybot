@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#set encoding=utf-8
 import re
 import os
 import urllib2
@@ -92,6 +93,9 @@ def tiny(user,channel,msg):
 			os.write(fd, page)
 			os.close(fd)
 			summary = filetypes.get_summary(url, fname)
+		if summary and len(summary) > 120:
+			# stick to ascii ellipsis for now until the world moves to utf-8…
+			summary = summary[:120] + '...'
 		summarycache[url] = summary
 	except IOError,e:
 		summarycache[url] = e.strerror

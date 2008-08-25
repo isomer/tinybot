@@ -24,7 +24,7 @@ for file in glob.glob("websites/*.py"):
 			summary_generators[x.website]=x.get_summary
 
 def get_summary(url, page):
-	match = re.match("http://(.*?)/.*$", url)
+	match = re.match("https?://([^/]+)", url, flags=re.IGNORECASE)
 	if not match:
 		return None
 	domain = match.group(1)

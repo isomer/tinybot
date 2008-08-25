@@ -13,3 +13,8 @@
 * Clean the code up!
 * Fix the bot code up
 * Add a config file for everything
+* Try <title>, <h1>...<h5> until you find a title that's mostly useable.
+* Avoid <title>'s that restate what the hostname/url already includes.
+* Expand tinyurls if the user pastes a tinyurl.
+* Do something smarter with pastieish links (eg, include the full pastie in the atom feed)
+* Support s///.
