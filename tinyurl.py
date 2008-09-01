@@ -67,7 +67,7 @@ def tiny(user,channel,msg):
             return x
         if debug != 1:
             try:
-            	f = fetch_url("http://is.gd/api.php?longurl=" + x)
+            	f = fetch_url("http://is.gd/api.php?longurl=" + x.replace("%","%25"))
                 r = f.read()
                 print "url:",`x`,"tinyurl:",`r`
                 tinycache[x] = r
@@ -176,6 +176,7 @@ def tiny(user,channel,msg):
 
 
 if __name__=="__main__":
+    print tiny("me","#channel","http://pr0nbot.phetast.nu/src/242482_I%2527ve%2520seen%2520these%2520guys%2520before-1220080640.jpg")
     print tiny("me","#channel","http://twitter.com/revgeorge/statuses/884264710")
     print tiny("him","#channel","http://twitter.com/revgeorge/statuses/884264710")
     print tiny("me","#channel","http://en.wikipedia.org/wiki/Puppet_state#The_first_puppet_states")
