@@ -62,22 +62,20 @@ def tiny(user,channel,msg):
         if x in tinycache:
             return tinycache[x]
         if x.startswith("tinyurl.com") \
-          or x.startswith("preview.tinyurl.com") \
-	  or x.startswith("is.gd") \
-          :
-            realurl[x]=x
+          or x.startswith("preview.tinyurl.com") or x.startswith("is.gd"):
+            realurl[x] = x
             return x
         if debug != 1:
             try:
-	    	f = fetch_url("http://is.gd/api.php?longurl="+x)
+            	f = fetch_url("http://is.gd/api.php?longurl=" + x)
                 r = f.read()
-		print "url:",`x`,"tinyurl:",`r`
-                tinycache[x]=r
-                realurl[r]=x
-            except IOError,e:
+                print "url:",`x`,"tinyurl:",`r`
+                tinycache[x] = r
+                realurl[r] = x
+            except IOError, e:
                 tinycache[x] = e.strerror
-	else:
-	    tinycache[x]=x
+        else:
+            tinycache[x]=x
 
         return tinycache[x]
 
@@ -193,3 +191,4 @@ if __name__=="__main__":
     print tiny("me","#channel","http://en.wikipedia.org/wiki/Main_Page")
     print tiny("me","#channel","http://www.trademe.co.nz/Home-living/Lifestyle/Wine-food/Food/auction-165301499.htm")
 
+# vi:et:sw=4:ts=4

@@ -9,13 +9,15 @@ def get_summary(url, page):
 	match = re.match(".*?<p><strong>(.*?)</strong></p>", page,re.DOTALL)
 	if match:
 		title = match.group(1)
-		return title
-	match = re.match(".*<title>(.*?)</title>", page, re.DOTALL)
-	if match:
-		title = match.group(1).strip()
-		# keep text up until date string
-		match = re.match("(.*?) - New Zealand", title)
-		print title, match
+	else:
+		match = re.match(".*<title>(.*?)</title>", page, re.DOTALL)
 		if match:
-			title = match.group(1)
+			title = match.group(1).strip()
+			# keep text up until date string
+			match = re.match("(.*?) - New Zealand", title)
+			print title, match
+			if match:
+				title = match.group(1)
+	# remove any html tags (eg for "BREAKING NEWS")
+	title, count = re.subn('<[^>]+>', '', title)
 	return title
