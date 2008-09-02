@@ -75,17 +75,22 @@ def unhtmlspecialchars(txt):
     txt = txt.decode("utf8") # turn into a unicode str
     def get_entity_char(match):
         """returns a unicode encoded char string for a given html entity
-        (eg '#167' -> u'§', 'eacute' -> u'é') """
+        (eg '&#167;' -> u'§', '&eacute;' -> u'é') """
         entity = match.group(1)
-        if entity.startswith("#"):
-            return unichr(int(entity[1:]))
-        else:
-            # turn nbsp into a normal space instead of a unicode nbsp
-            if entity == 'nbsp':
-                return u' '
-            return htmlentitydefs.entitydefs[entity].decode("latin1")
+        if not entity.startswith("&#"):
+            # it's a named entity
+            try:
+                entity = htmlentitydefs.entitydefs[entity[1:-1]].decode("latin1")
+            except:
+                # someone has used a non-standard entity name, or made a typo?
+                pass
+            # we now either have a unicode char, or another html entity if
+            # it was a char not in latin1...
+        if entity.startswith("&#"):
+            return unichr(int(entity[2:-1]))
+        return entity
 
-    ret = re.sub("&(#?[A-Za-z0-9]+);", get_entity_char, txt)
+    ret = re.sub("(&#?[A-Za-z0-9]+;)", get_entity_char, txt)
     return ret.encode('utf8')
 
 load_plugins()
