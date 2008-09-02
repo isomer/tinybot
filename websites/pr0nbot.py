@@ -4,22 +4,28 @@ import re
 
 website="pr0nbot.phetast.nu"
 
-def duration(x):
+def when(x):
     ret=""
-    if x>86400:
-        return "%dd%dh%02dm%02ds" % (x/86400,(x/3600)%24,(x/60)%60,x%60)
-    if x>3600:
-        return "%dh%02dm%02ds" % (x/3600,(x/60)%60,x%60)
+    if x>86400*30:
+    	return time.strftime("%Y-%m-%d",time.localtime(x))
+    elif x>86400*7:
+        return time.strftime("%a %B %d",time.localtime(x))
+    elif x>86400*2:
+    	return "last "+time.strftime("%A",time.localtime(x))
+    elif x>86400:
+    	return "yesterday"
+    elif x>3600:
+        return "%d hours, %d minutes ago" % (x/3600,(x/60)%60)
     elif x>60:
-        return "%dm%02ds" % ((x/60)%60,x%60)
+        return "%d minutes, %d seconds ago" % ((x/60)%60,x%60)
     else:
-        return "%ds" % (x%60)
+        return "%d seconds ago" % (x%60)
 
 def get_summary(url, page):
-	match = re.match("http://pr0nbot.phetast.nu/src/(.*)-([0-9]+)\.jpg$", url)
+	match = re.match("(?i)http://pr0nbot.phetast.nu/src/(.*)-([0-9]+)\.(gif|jpe?g)$", url)
 	if match:
 		pagename = urllib2.unquote(urllib2.unquote(match.group(1)))
 		pagename = pagename.replace("_"," ").replace("#",": ")
-		pagename += " (%s ago)" % duration(time.time()-int(match.group(2)))
+		pagename += " (%s)" % when(time.time()-int(match.group(2)))
 		return pagename
 	return None
