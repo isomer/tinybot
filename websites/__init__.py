@@ -68,6 +68,8 @@ def get_summary(url, page):
         # Apply as many cleanups as possible
         for rx, replacement in cleanups:
             title = re.sub(rx, replacement, title)
+        # remove leading/trailing whitespace
+        title = title.strip()
     return title
 
 def unhtmlspecialchars(txt):
