@@ -72,9 +72,9 @@ def tiny(user,channel,msg):
                 print "url:",`x`,"tinyurl:",`r`
                 tinycache[x] = r
                 realurl[r] = x
-            except HTTPError, e:
+            except urllib2.HTTPError, e:
                 tinycache[x] = "HTTP Error %s: %s" % (e.code,e.msg)
-            except URLError, e:
+            except urllib2.URLError, e:
                 tinycache[x] = str(e.reason)
             except IOError, e:
                 tinycache[x] = e.strerror
