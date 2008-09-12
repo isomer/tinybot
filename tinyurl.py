@@ -82,7 +82,7 @@ def tiny(user,channel,msg):
                 print "tinyurl() URLError:", e.reason
             except IOError, e:
                 print "tinyurl() IOError:", e.strerror
-            except Error, e:
+            except Exception, e:
                 print "tinyurl() Error: " + str(e)
         if not tinycache.has_key(x): # we had an error above trying to set it
             tinycache[x] = x
@@ -106,9 +106,12 @@ def tiny(user,channel,msg):
                 summary = summary[:120] + '...'
             summarycache[url] = summary
         except IOError, e:
+            # probably some sort of network error...
             summarycache[url] = e.strerror
-        except Error, e:
-            summarycache[url] = str(e)
+        except Exception, e:
+            # oops, probably our coding error...
+            print "findsummary() Error: " + str(e)
+            summarycache[url] = ""
         return summarycache[url]
 
     origmsg=msg
