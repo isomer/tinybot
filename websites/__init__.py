@@ -68,6 +68,8 @@ def get_summary(url, page):
         # Apply as many cleanups as possible
         for rx, replacement in cleanups:
             title = re.sub(rx, replacement, title)
+        # remove leading/trailing whitespace
+        title = title.strip()
     return title
 
 def unhtmlspecialchars(txt):
@@ -87,7 +89,11 @@ def unhtmlspecialchars(txt):
             # we now either have a unicode char, or another html entity if
             # it was a char not in latin1...
         if entity.startswith("&#"):
-            return unichr(int(entity[2:-1]))
+            # Numeric Character Reference
+            code = entity[2:-1] # ignore leading &# and trailing ;
+            if code[0] in ('x','X'): # hex
+                return unichr(int(code[1:], 16))
+            return unichr(int(code))
         return entity
 
     ret = re.sub("(&#?[A-Za-z0-9]+;)", get_entity_char, txt)
