@@ -35,7 +35,7 @@ def fetch_url(url):
     # wikimedia detects and blocks requests from urllib's default user-agent
     u.add_header('User-Agent','Mozilla/4.0 (compatible; Tinier; Linux; Parsing title tags for IRC)')
     # can add other things to the request before we send it... eg set_proxy()
-    u.add_header("Accept","text/html")
+    u.add_header("Accept","text/html,text/*,*/*")
     return urllib2.urlopen(u)
 
 
@@ -107,6 +107,7 @@ def tiny(user,channel,msg):
             summarycache[url] = summary
         except IOError, e:
             # probably some sort of network error...
+            print "findsummary() IOError: " + str(e)
             summarycache[url] = e.strerror
         except Exception, e:
             # oops, probably our coding error...
