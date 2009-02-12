@@ -196,6 +196,7 @@ def tiny(user,channel,msg):
 
 
 if __name__=="__main__":
+    print tiny("me","#channel","http://limerickdb.com/?347")
     print tiny("me","#channel","http://twitter.com/revgeorge/statuses/884264710")
     print tiny("me","#channel","http://pr0nbot.phetast.nu/src/242482_I%2527ve%2520seen%2520these%2520guys%2520before-1220080640.jpg")
     print tiny("me","#channel","http://www.answerbag.com/")
