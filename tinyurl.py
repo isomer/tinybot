@@ -6,6 +6,7 @@ import urllib2
 import time
 import htmlentitydefs
 import tempfile
+import sys
 
 import atom
 import websites
@@ -35,8 +36,13 @@ def fetch_url(url):
     # wikimedia detects and blocks requests from urllib's default user-agent
     u.add_header('User-Agent','Mozilla/4.0 (compatible; Tinier; Linux; Parsing title tags for IRC)')
     # can add other things to the request before we send it... eg set_proxy()
-    u.add_header("Accept","text/html,text/*,*/*")
-    return urllib2.urlopen(u)
+    u.add_header("Accept","text/html")
+    n = None
+    try:
+        n = urllib2.urlopen(u)
+    except Exception, e:
+        print e
+    return n
 
 
 def get_real_url(url):
@@ -94,7 +100,8 @@ def tiny(user,channel,msg):
         if url in summarycache:
             return summarycache[url]
         try:
-            page = fetch_url(url).read(64*1024)
+            p = fetch_url(url)
+            page = p.read(64*1024)
             summary = websites.get_summary(url, page)
             if summary is None:
                 fd, fname = tempfile.mkstemp()
@@ -107,7 +114,6 @@ def tiny(user,channel,msg):
             summarycache[url] = summary
         except IOError, e:
             # probably some sort of network error...
-            print "findsummary() IOError: " + str(e)
             summarycache[url] = e.strerror
         except Exception, e:
             # oops, probably our coding error...
@@ -190,8 +196,10 @@ def tiny(user,channel,msg):
 
 
 if __name__=="__main__":
-    print tiny("me","#channel","http://pr0nbot.phetast.nu/src/242482_I%2527ve%2520seen%2520these%2520guys%2520before-1220080640.jpg")
     print tiny("me","#channel","http://twitter.com/revgeorge/statuses/884264710")
+    print tiny("me","#channel","http://pr0nbot.phetast.nu/src/242482_I%2527ve%2520seen%2520these%2520guys%2520before-1220080640.jpg")
+    print tiny("me","#channel","http://www.answerbag.com/")
+    sys.exit(1)
     print tiny("him","#channel","http://twitter.com/revgeorge/statuses/884264710")
     print tiny("me","#channel","http://en.wikipedia.org/wiki/Puppet_state#The_first_puppet_states")
     print tiny("me","#channel","http://www.stuff.co.nz/4664076a28.html")
