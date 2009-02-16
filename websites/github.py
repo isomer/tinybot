@@ -74,7 +74,7 @@ def get_summary(url, page):
 
         if type == "commit":
                 return get_commit_summary(url, page)
-        elif type == "tree":
+        elif type == "tree" or type == "commits":
                 return get_tree_summary(url, page)
 
         # Unhandled page type, return default summary
