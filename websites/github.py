@@ -4,7 +4,6 @@
 # - Initial support added for commits messages
 #
 
-import sys
 import re
 
 website = "github.com"
@@ -22,11 +21,10 @@ def get_commit_summary(url, page):
                "reponame: [shortsha1hash] Short commit message"
 
         """
-        sha1 = ""
-        msg = ""
         parts = url.split("/")
         reponame = parts[4]
         sha1 = parts[-1][:5]
+        msg = ""
 
         index = page.find('<div class="message">')
         if (index == -1):
@@ -58,6 +56,7 @@ def get_summary(url, page):
         return None
 
 if __name__ == "__main__":
+        import sys
         f = open(sys.argv[1], "r")
         print get_summary("http://github.com/scottr/tinybot/commit/4171b7e9cf1edd782a8c5fb5af1a3a581b8f4610", f.read())
         f.close()
