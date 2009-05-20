@@ -196,23 +196,29 @@ def tiny(user,channel,msg):
 
 
 if __name__=="__main__":
-    print tiny("me","#channel","http://limerickdb.com/?347")
-    print tiny("me","#channel","http://twitter.com/revgeorge/statuses/884264710")
-    print tiny("me","#channel","http://pr0nbot.phetast.nu/src/242482_I%2527ve%2520seen%2520these%2520guys%2520before-1220080640.jpg")
-    print tiny("me","#channel","http://www.answerbag.com/")
-    sys.exit(1)
-    print tiny("him","#channel","http://twitter.com/revgeorge/statuses/884264710")
-    print tiny("me","#channel","http://en.wikipedia.org/wiki/Puppet_state#The_first_puppet_states")
-    print tiny("me","#channel","http://www.stuff.co.nz/4664076a28.html")
-    print tiny("me","#channel","http://www.flickr.com/photos/tonyandrach/2712775977/in/set-72157606435991911")
-    print tiny("me","#channel","http://porter.net.nz/~alastair/trace.txt")
-    print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
-    print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
-    print tiny("me","#channel","http://azarask.in/blog/post/not-the-users-fault-manifesto/")
-    print tiny("me","#channel","http://slashdot.org this is a test http://example.org http://www.news.com.au/heraldsun/story/0,21985,23245649-5005961,00.html")
-    print tiny("me","#channel","http://www.syddutyfree.com.au/ShopNowOrJustBrowsing.aspx?returnURL=%2fcategory%2fliquor%2fwhiskeys-and-cognacs%2f12426-glenfiddich-30-year-old-750ml")
-    print tiny("me","#channel","http://foss-means-business.org/Image:IMG_0172.JPG")
-    print tiny("me","#channel","http://en.wikipedia.org/wiki/Main_Page")
-    print tiny("me","#channel","http://www.trademe.co.nz/Home-living/Lifestyle/Wine-food/Food/auction-165301499.htm")
+    print "github:"
+    if sys.argv[1:] == []:
+        print tiny("me","#channel","http://github.com/isomer/tinybot/tree/master")
+        print
+        print tiny("me","#channel","http://limerickdb.com/?347")
+        print tiny("me","#channel","http://twitter.com/revgeorge/statuses/884264710")
+        print tiny("me","#channel","http://pr0nbot.phetast.nu/src/242482_I%2527ve%2520seen%2520these%2520guys%2520before-1220080640.jpg")
+        print tiny("me","#channel","http://www.answerbag.com/")
+        sys.exit(1)
+        print tiny("him","#channel","http://twitter.com/revgeorge/statuses/884264710")
+        print tiny("me","#channel","http://en.wikipedia.org/wiki/Puppet_state#The_first_puppet_states")
+        print tiny("me","#channel","http://www.stuff.co.nz/4664076a28.html")
+        print tiny("me","#channel","http://www.flickr.com/photos/tonyandrach/2712775977/in/set-72157606435991911")
+        print tiny("me","#channel","http://porter.net.nz/~alastair/trace.txt")
+        print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
+        print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
+        print tiny("me","#channel","http://azarask.in/blog/post/not-the-users-fault-manifesto/")
+        print tiny("me","#channel","http://slashdot.org this is a test http://example.org http://www.news.com.au/heraldsun/story/0,21985,23245649-5005961,00.html")
+        print tiny("me","#channel","http://www.syddutyfree.com.au/ShopNowOrJustBrowsing.aspx?returnURL=%2fcategory%2fliquor%2fwhiskeys-and-cognacs%2f12426-glenfiddich-30-year-old-750ml")
+        print tiny("me","#channel","http://foss-means-business.org/Image:IMG_0172.JPG")
+        print tiny("me","#channel","http://en.wikipedia.org/wiki/Main_Page")
+        print tiny("me","#channel","http://www.trademe.co.nz/Home-living/Lifestyle/Wine-food/Food/auction-165301499.htm")
+    else:
+        print tiny(os.environ["LOGNAME"],"#cmdline",sys.argv[1])
 
 # vi:et:sw=4:ts=4
