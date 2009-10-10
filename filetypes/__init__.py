@@ -1,12 +1,15 @@
 import glob
 import re
 import mimetypes
+import os
 
 summary_generators={}
 
 for file in glob.glob("filetypes/*.py"):
 	if not file.endswith("__init__.py"):
-		x = __import__(file[:-3])
+		parts = file[:-3].split( os.path.sep )
+		mod, name = '.'.join( parts ), parts[-1:]
+		x = __import__( mod, globals(), locals(), name )
 		if "get_summary" in dir(x) and "mimetype" in dir(x):
 			summary_generators[x.mimetype]=x.get_summary
 
