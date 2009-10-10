@@ -53,7 +53,7 @@ def get_summary(url, page):
             try:
                 title = summary_generators[domain](url, page)
             except Exception, e:
-                print >>sys.stderr, "get_summary for %url failed:" % url, e
+                print >>sys.stderr, "get_summary for %s failed:" % url, e
             break
         # didn't have a handler for this domain... try removing subdomains
         dotpos = domain.find('.')

@@ -9,7 +9,7 @@ def clean(html):
 	return txt
 
 def get_summary(url, page):
-	if url.contains("static.flickr.com"):
+	if url.find("static.flickr.com") > 0:
 		return url.split("/")[-1]
 
 	heading, date, by = None, None, ""
