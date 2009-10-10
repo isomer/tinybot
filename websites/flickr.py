@@ -9,6 +9,9 @@ def clean(html):
 	return txt
 
 def get_summary(url, page):
+	if url.contains("static.flickr.com"):
+		return url.split("/")[-1]
+
 	heading, date, by = None, None, ""
 
 	# try getting first heading tag in the Main div
