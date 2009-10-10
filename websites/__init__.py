@@ -4,6 +4,7 @@ import glob
 import re
 import htmlentitydefs
 import signal
+import os
 
 """this module dynamically loads all the other modules for handling
 urls from specific domain names, and also provides a default handler.
@@ -30,7 +31,9 @@ def load_plugins():
                 module_name = filename[:-3]
                 if sys.modules.has_key(module_name): # previously loaded
                     del(sys.modules[module_name]) # forget it's loaded
-                x = __import__(module_name)
+                parts = module_name.split(os.path.sep)
+                mod, name = '.'.join( parts ), parts[-1:]
+                x = __import__( mod, globals(), locals(), name )
                 if "get_summary" in dir(x) and "website" in dir(x):
                     summary_generators[x.website] = x.get_summary
                     print >>sys.stderr, "loaded handler for %s" % x.website
