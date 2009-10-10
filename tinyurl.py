@@ -108,9 +108,9 @@ def tiny(user,channel,msg):
                 os.write(fd, page)
                 os.close(fd)
                 summary = filetypes.get_summary(url, fname)
-            if summary and len(summary) > 120:
+            if summary and len(summary) > 160:
                 # stick to ascii ellipsis for now until the world moves to utf8…
-                summary = summary[:120] + '...'
+                summary = summary[:160] + '...'
             summarycache[url] = summary
         except IOError, e:
             # probably some sort of network error...
@@ -196,6 +196,8 @@ def tiny(user,channel,msg):
 
 
 if __name__=="__main__":
+    print tiny("me","#channel","http://farm4.static.flickr.com/3185/2544987701_dca251f995.jpg")
+    print tiny("me","#channel","http://www.flickr.com/photos/tonyandrach/2712775977/in/set-72157606435991911")
     print tiny("me","#channel","http://twitter.com/revgeorge/statuses/884264710")
     print tiny("me","#channel","http://pr0nbot.phetast.nu/src/242482_I%2527ve%2520seen%2520these%2520guys%2520before-1220080640.jpg")
     print tiny("me","#channel","http://www.answerbag.com/")
@@ -203,7 +205,6 @@ if __name__=="__main__":
     print tiny("him","#channel","http://twitter.com/revgeorge/statuses/884264710")
     print tiny("me","#channel","http://en.wikipedia.org/wiki/Puppet_state#The_first_puppet_states")
     print tiny("me","#channel","http://www.stuff.co.nz/4664076a28.html")
-    print tiny("me","#channel","http://www.flickr.com/photos/tonyandrach/2712775977/in/set-72157606435991911")
     print tiny("me","#channel","http://porter.net.nz/~alastair/trace.txt")
     print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
     print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
