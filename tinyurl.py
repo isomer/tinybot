@@ -108,9 +108,9 @@ def tiny(user,channel,msg):
                 os.write(fd, page)
                 os.close(fd)
                 summary = filetypes.get_summary(url, fname)
-            if summary and len(summary) > 120:
+            if summary and len(summary) > 300:
                 # stick to ascii ellipsis for now until the world moves to utf8…
-                summary = summary[:120] + '...'
+                summary = summary[:300] + '...'
             summarycache[url] = summary
         except IOError, e:
             # probably some sort of network error...
