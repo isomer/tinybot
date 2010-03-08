@@ -17,6 +17,15 @@ summarycache={} # url => summary
 timeline={} # channel => tinyurl => (timestamp,who)
 realurl={} # tinyurl => url
 
+def urlencode(x):
+    r=""
+    for i in x:
+        if i in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.":
+            r+=i    
+        else:
+            r+="%%%02x" % ord(i)
+    return r
+
 debug = False
 
 def duration(x):
@@ -60,6 +69,9 @@ def get_summary(url):
     else:
         return realurl
 
+def _notagroup(x):
+    return "(?:"+x+")"
+
 def tiny(user,channel,msg):
     """returns a string to reply to a target, or returns None if there
     was nothing interesting found to reply to in the msg"""
@@ -70,13 +82,17 @@ def tiny(user,channel,msg):
         print "tinyurling",`x`
         if x in tinycache:
             return tinycache[x]
-        if x.startswith("tinyurl.com") \
-          or x.startswith("preview.tinyurl.com") or x.startswith("is.gd"):
+        if x.startswith("http://tinyurl.com") \
+          or x.startswith("http://preview.tinyurl.com") \
+          or x.startswith("http://is.gd") \
+          or x.startswith("http://geek.cn"):
             realurl[x] = x
             return x
         if not debug:
             try:
-                f = fetch_url("http://is.gd/api.php?longurl=" + x.replace("%","%25"))
+                #f = fetch_url("http://is.gd/api.php?longurl=" + x.replace("%","%25"))
+                #r = f.read()
+                f = fetch_url("http://geek.cn/create.php?type=raw&url="+urlencode(x))
                 r = f.read()
                 print "url:",`x`,"tinyurl:",`r`
                 tinycache[x] = r
@@ -130,7 +146,9 @@ def tiny(user,channel,msg):
         userpass = r"(?:[^:@/]*:[^/]*@)?"
         host = r"(?:[-_\[\]:0-9a-zA-Z\.]+)"
         port = r"(?::[0-9]+)?"
-        path = r"(?:/(?:[-!@a-zA-Z0-9,.%&;=/+:?_~]*[^#\.!,\) ])?)?"
+        urlchars=r"[-!@a-zA-Z0-9,.%&;=/+:?_~]"
+        path = _notagroup("/"+_notagroup(urlchars+r"|\("+urlchars+r"*\)")+r"*" + "[^#\.!,\) ]?")+r"?"
+        #path = r"(?:/(?:?("+urlchars+"|\("+urlchars+"*\))*)?)?"
         fragment = r"(?:#[-!@a-zA-Z0-9,.%&;=/+:?_~]*[^\.!,\) ])?"
 
         url="(.*?)("+protocol+userpass+host+port+path+")("+fragment+")(.*)"
@@ -170,7 +188,7 @@ def tiny(user,channel,msg):
             else:
                 m=m+i[0]
         else:
-            m=m+"TIMELINE(%s ago by %s)" % (duration(time.time()-timeline[channel][i[0]][0]),timeline[channel][i[0]][1])
+            m=m+"%s [TIMELINE %s ago by %s]" % (i[0],duration(time.time()-timeline[channel][i[0]][0]),timeline[channel][i[0]][1])
     if m == origmsg:
         return
     msg = "<%s> %s" % (user,m)
@@ -207,6 +225,7 @@ def tiny(user,channel,msg):
 if __name__=="__main__":
     print "github:"
     if sys.argv[1:] == []:
+        print tiny("me","#channel","http://en.wikipedia.org/wiki/Graph_(mathematics)")
         print tiny("me","#channel","http://github.com/isomer/tinybot/tree/master")
         print
         print tiny("me","#channel","http://slashdot.org this is a test http://example.org http://www.news.com.au/heraldsun/story/0,21985,23245649-5005961,00.html")
@@ -228,6 +247,7 @@ if __name__=="__main__":
         print tiny("me","#channel","http://en.wikipedia.org/wiki/Main_Page")
         print tiny("me","#channel","http://www.trademe.co.nz/Home-living/Lifestyle/Wine-food/Food/auction-165301499.htm")
     else:
-        print tiny(os.environ["LOGNAME"],"#cmdline",sys.argv[1])
+        for i in sys.argv[1:]:
+            print tiny(os.environ["LOGNAME"],"#cmdline",i)
 
 # vi:et:sw=4:ts=4
