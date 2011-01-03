@@ -161,7 +161,7 @@ def tiny(user,channel,msg):
         userpass = r"(?:[^:@/]*:[^/]*@)?"
         host = r"(?:[-_\[\]:0-9a-zA-Z\.]+)"
         port = r"(?::[0-9]+)?"
-        urlchars=r"[-!@a-zA-Z0-9,.%&;=/+:?_~]"
+        urlchars=r"(?:[-!@a-zA-Z0-9,.%&;=/+:?_~]|#!)"
         path = _notagroup("/"+_notagroup(urlchars+r"|\("+urlchars+r"*\)")+r"*" + "[^#\.!,\) ]?")+r"?"
         #path = r"(?:/(?:?("+urlchars+"|\("+urlchars+"*\))*)?)?"
         fragment = r"(?:#[-!@a-zA-Z0-9,.%&;=/+:?_~]*[^\.!,\) ])?"
