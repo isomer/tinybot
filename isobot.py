@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # twisted imports
-from twisted.protocols import irc
+from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 
 # system imports
