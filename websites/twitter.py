@@ -4,7 +4,7 @@ website="twitter.com"
 
 def get_summary(url, page):
 
-	user = re.match('.*twitter.com/([^/]*)(/.*)?', url, re.DOTALL)
+	user = re.match('.*twitter.com/(?:#!/)?([^/]*)(/.*)?', url, re.DOTALL)
 	if user:
 		user = '@%s' % user.groups(1)[0]
 	else:

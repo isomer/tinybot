@@ -6,6 +6,9 @@ import urllib2
 import time
 import tempfile
 import sys
+import urlparse
+import urllib # for urlencode
+import StringIO
 
 import atom
 import websites
@@ -49,8 +52,19 @@ def fetch_url(url):
     try:
         n = urllib2.urlopen(u)
     except Exception, e:
-        print e
+        return StringIO.StringIO(str(e))
     return n
+
+
+def get_nonajaxurl(url):
+    # See http://code.google.com/web/ajaxcrawling/docs/specification.html
+    if '#!' not in url:
+        return url
+    scheme, netlock, path, params, query, fragment = urlparse.urlparse(url)
+    query = urlparse.parse_qsl(query)
+    query.append(('_escaped_fragment_', fragment[1:]))
+    query = urllib.urlencode(query)
+    return urlparse.urlunparse((scheme, netlock, path, params, query, ''))
 
 
 def get_real_url(url):
@@ -115,7 +129,7 @@ def tiny(user,channel,msg):
         if url in summarycache:
             return summarycache[url]
         try:
-            p = fetch_url(url)
+            p = fetch_url(get_nonajaxurl(url))
             page = p.read(64*1024)
             summary = websites.get_summary(url, page)
             if summary is None:
@@ -134,6 +148,7 @@ def tiny(user,channel,msg):
             # oops, probably our coding error...
             print "findsummary() Error: " + str(e)
             summarycache[url] = ""
+            raise
         return summarycache[url]
 
     origmsg=msg
@@ -145,7 +160,7 @@ def tiny(user,channel,msg):
         userpass = r"(?:[^:@/]*:[^/]*@)?"
         host = r"(?:[-_\[\]:0-9a-zA-Z\.]+)"
         port = r"(?::[0-9]+)?"
-        urlchars=r"[-!@a-zA-Z0-9,.%&;=/+:?_~]"
+        urlchars=r"(?:[-!@a-zA-Z0-9,.%&;=/+:?_~]|#!)"
         path = _notagroup("/"+_notagroup(urlchars+r"|\("+urlchars+r"*\)")+r"*" + "[^#\.!,\) ]?")+r"?"
         #path = r"(?:/(?:?("+urlchars+"|\("+urlchars+"*\))*)?)?"
         fragment = r"(?:#[-!@a-zA-Z0-9,.%&;=/+:?_~]*[^\.!,\) ])?"
@@ -224,6 +239,7 @@ def tiny(user,channel,msg):
 if __name__=="__main__":
     print "github:"
     if sys.argv[1:] == []:
+        print tiny("me","#channel","http://twitter.com/#!/clembastow/status/21798043317698560")
         print tiny("me","#channel","http://en.wikipedia.org/wiki/Graph_(mathematics)")
         print tiny("me","#channel","http://github.com/isomer/tinybot/tree/master")
         print
