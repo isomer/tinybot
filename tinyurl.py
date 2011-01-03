@@ -4,7 +4,6 @@ import re
 import os
 import urllib2
 import time
-import htmlentitydefs
 import tempfile
 import sys
 
