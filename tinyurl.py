@@ -9,6 +9,7 @@ import tempfile
 import sys
 import urlparse
 import urllib # for urlencode
+import StringIO
 
 import atom
 import websites
@@ -52,7 +53,7 @@ def fetch_url(url):
     try:
         n = urllib2.urlopen(u)
     except Exception, e:
-        print e
+        return StringIO.StringIO(str(e))
     return n
 
 
