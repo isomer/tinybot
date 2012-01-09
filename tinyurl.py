@@ -239,6 +239,7 @@ def tiny(user,channel,msg):
 if __name__=="__main__":
     print "github:"
     if sys.argv[1:] == []:
+        print tiny('me','#channel','http://www.youtube.com/watch?v=pFS4zYWxzNA')
         print tiny("me","#channel","http://twitter.com/#!/clembastow/status/21798043317698560")
         print tiny("me","#channel","http://en.wikipedia.org/wiki/Graph_(mathematics)")
         print tiny("me","#channel","http://github.com/isomer/tinybot/tree/master")
