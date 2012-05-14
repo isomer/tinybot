@@ -26,20 +26,14 @@ def get_commit_summary(url, page):
         sha1 = parts[-1][:5]
         msg = ""
 
-        index = page.find('<div class="message">')
+        index = page.find('<div class="commit full-commit ">')
         if (index == -1):
                 return None
 
         # Take the first sentence of the commit log between the <pre> tags 
-        match = re.match(r".*?<pre>(.*?)</pre>", page[index:], re.DOTALL)
+        match = re.match(r'.*?<p class="commit-title">(.*?)</p>', page[index:], re.DOTALL)
         if match:
-                msg = clean(match.group(1))
-                # git convention is to use the first sentence of the commit
-                # message as a summary. Return everything up to the first
-                # period.
-                index = msg.find(".")
-                if (index != -1):
-                        msg = msg[:index]
+                msg = match.group(1).strip()
 
         return "%s [%s] %s." % (reponame, sha1, msg)
 
