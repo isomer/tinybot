@@ -23,7 +23,7 @@ def when(t):
         return "%d seconds ago" % (diff%60)
 
 def get_summary(url, page):
-	match = re.match("(?i)http://pr0nbot.phetast.nu/src/(.*)-([0-9]+)\.(gif|jpe?g|png)$", url)
+	match = re.match("(?i)https?://pr0nbot.phetast.nu/src/(.*)-([0-9]+)\.(gif|jpe?g|png)$", url)
 	if match:
 		pagename = urllib2.unquote(urllib2.unquote(match.group(1)))
 		pagename = pagename.replace("_"," ").replace("#",": ")

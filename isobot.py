@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # twisted imports
-from twisted.protocols import irc
+from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 
 # system imports
@@ -34,24 +34,54 @@ class IsoBot(irc.IRCClient):
         if tiny_settings.x_login:
             self.msg("x@channels.undernet.org", tiny_settings.x_login)
         self.mode(self.nickname, '+', 'ix')
+
+    def join_channels(self):
         for channel, key in tiny_settings.channels.items():
-            self.join("#" + channel, key)
+            self.join(channel, key)
 
     def irc_unknown(self, prefix, command, params):
-    	if command=="PONG":
+        # Ignore these commands
+    	if command in [
+            "PONG",
+            "333", # RPL_TOPICWHOTIME
+            "RPL_NAMREPLY", 
+            "RPL_ENDOFNAMES",
+            "ERR_NOMOTD",
+            ]:
             return
-        if command=="396":
-            pass
-		# Commands to do on auth successful
+        # Display these, they might be important
+        if command in ["ERR_BADCHANNELKEY"]:
+            print "WARNING:",command,params
+            return
+        # Our host is now hidden, we can join channels now
+        if command == "396": # RPL_HOSTHIDDEN
+            self.join_channels()
+            return
+        if command == "INVITE":
+            who,channel = params[:2]
+            print "Invited to",channel,"by",prefix
+            if channel in tiny_settings.channels:
+                self.join(channel,tiny_settings.channels[channel])
+            else:
+                self.msg(prefix,"I don't like that channel")
+            return
+        # NFI?
+        print "Unknown command:",command,params
  
     def notice(self, user, channel, msg):
     	print user,"NOTICE",channel,msg
+
+    def invite(self, user, channel, msg):
+        pass
 
     def privmsg(self, user, channel, msg):
         """This will get called when the bot receives a message."""
         user = user.split('!', 1)[0]
         print user, "PRIVMSG", channel, msg
-        if channel == 'AUTH' or user.lower().endswith("undernet.org"):
+        if "@" not in user and "." in user:
+            # Server message
+            return
+        if channel == 'AUTH':
             # server message during connect
             return
         target = channel # where to send reply

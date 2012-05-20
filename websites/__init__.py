@@ -62,7 +62,7 @@ def get_summary(url, page):
         domain = domain[dotpos+1:]
 
     if not title: # no specific handler found
-        a = re.match('.*< *title[^>]*>(.*)</ *title *>.*',page, re.DOTALL| re.IGNORECASE)
+        a = re.match('.*?< *title[^>]*>(.*?)</ *title *>.*',page, re.DOTALL| re.IGNORECASE)
         if a:
             title = a.group(1)
     if title:

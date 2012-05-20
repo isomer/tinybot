@@ -4,9 +4,11 @@ import re
 import os
 import urllib2
 import time
-import htmlentitydefs
 import tempfile
 import sys
+import urlparse
+import urllib # for urlencode
+import StringIO
 
 import atom
 import websites
@@ -16,6 +18,15 @@ tinycache={}    # url => tinyurl
 summarycache={} # url => summary
 timeline={} # channel => tinyurl => (timestamp,who)
 realurl={} # tinyurl => url
+
+def urlencode(x):
+    r=""
+    for i in x:
+        if i in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.":
+            r+=i
+        else:
+            r+="%%%02x" % ord(i)
+    return r
 
 debug = False
 
@@ -41,8 +52,19 @@ def fetch_url(url):
     try:
         n = urllib2.urlopen(u)
     except Exception, e:
-        print e
+        return StringIO.StringIO(str(e))
     return n
+
+
+def get_nonajaxurl(url):
+    # See http://code.google.com/web/ajaxcrawling/docs/specification.html
+    if '#!' not in url:
+        return url
+    scheme, netlock, path, params, query, fragment = urlparse.urlparse(url)
+    query = urlparse.parse_qsl(query)
+    query.append(('_escaped_fragment_', fragment[1:]))
+    query = urllib.urlencode(query)
+    return urlparse.urlunparse((scheme, netlock, path, params, query, ''))
 
 
 def get_real_url(url):
@@ -60,6 +82,9 @@ def get_summary(url):
     else:
         return realurl
 
+def _notagroup(x):
+    return "(?:"+x+")"
+
 def tiny(user,channel,msg):
     """returns a string to reply to a target, or returns None if there
     was nothing interesting found to reply to in the msg"""
@@ -70,13 +95,17 @@ def tiny(user,channel,msg):
         print "tinyurling",`x`
         if x in tinycache:
             return tinycache[x]
-        if x.startswith("tinyurl.com") \
-          or x.startswith("preview.tinyurl.com") or x.startswith("is.gd"):
+        if x.startswith("http://tinyurl.com") \
+          or x.startswith("http://preview.tinyurl.com") \
+          or x.startswith("http://is.gd") \
+          or x.startswith("http://geek.cn"):
             realurl[x] = x
             return x
         if not debug:
             try:
-                f = fetch_url("http://is.gd/api.php?longurl=" + x.replace("%","%25"))
+                #f = fetch_url("http://is.gd/api.php?longurl=" + x.replace("%","%25"))
+                #r = f.read()
+                f = fetch_url("http://geek.cn/create.php?type=raw&url="+urlencode(x))
                 r = f.read()
                 print "url:",`x`,"tinyurl:",`r`
                 tinycache[x] = r
@@ -100,7 +129,7 @@ def tiny(user,channel,msg):
         if url in summarycache:
             return summarycache[url]
         try:
-            p = fetch_url(url)
+            p = fetch_url(get_nonajaxurl(url))
             page = p.read(64*1024)
             summary = websites.get_summary(url, page)
             if summary is None:
@@ -108,9 +137,9 @@ def tiny(user,channel,msg):
                 os.write(fd, page)
                 os.close(fd)
                 summary = filetypes.get_summary(url, fname)
-            if summary and len(summary) > 160:
+            if summary and len(summary) > 300:
                 # stick to ascii ellipsis for now until the world moves to utf8…
-                summary = summary[:160] + '...'
+                summary = summary[:300] + '...'
             summarycache[url] = summary
         except IOError, e:
             # probably some sort of network error...
@@ -119,6 +148,7 @@ def tiny(user,channel,msg):
             # oops, probably our coding error...
             print "findsummary() Error: " + str(e)
             summarycache[url] = ""
+            raise
         return summarycache[url]
 
     origmsg=msg
@@ -126,7 +156,18 @@ def tiny(user,channel,msg):
     bits=[] # msg split up into strings or (tinyurl, summary) items
 
     while 1:
-        a = re.match(r"(.*?)(https?://[-!@a-zA-Z0-9,.%&;=/+:?_~]*[^#\.!,\) ])(#[-!@a-zA-Z0-9,.%&;=/+:?_~]*[^\.!,\) ])?(.*)", msg)
+        protocol = r"(?:http|https|ftp)://"
+        userpass = r"(?:[^:@/]*:[^/]*@)?"
+        host = r"(?:[-_\[\]:0-9a-zA-Z\.]+)"
+        port = r"(?::[0-9]+)?"
+        urlchars=r"(?:[-!@a-zA-Z0-9,.%&;=/+:?_~]|#!)"
+        path = _notagroup("/"+_notagroup(urlchars+r"|\("+urlchars+r"*\)")+r"*" + "[^#\.!,\) ]?")+r"?"
+        #path = r"(?:/(?:?("+urlchars+"|\("+urlchars+"*\))*)?)?"
+        fragment = r"(?:#[-!@a-zA-Z0-9,.%&;=/+:?_~]*[^\.!,\) ])?"
+
+        url="(.*?)("+protocol+userpass+host+port+path+")("+fragment+")(.*)"
+        a = re.match(url, msg)
+        #a = re.match(r"(.*?)(https?://(?:\[[^\]]*\]|[-!@a-zA-Z0-9,.%&;=/+:?_~]*[^#\.!,\) ])(#[-!@a-zA-Z0-9,.%&;=/+:?_~]*[^\.!,\) ])?(.*)", msg)
         if a is None:
             if msg: # any trailing text after url
                 bits.append(msg)
@@ -142,7 +183,7 @@ def tiny(user,channel,msg):
         if frag:
             tinied += frag
             url += frag
-        if len(tinied) <= len(url): 
+        if len(tinied) <= len(url):
             if starttext:
                 bits = bits+[starttext]
             bits = bits+[(tinied, findsummary(url))]
@@ -161,7 +202,7 @@ def tiny(user,channel,msg):
             else:
                 m=m+i[0]
         else:
-            m=m+"TIMELINE(%s ago by %s)" % (duration(time.time()-timeline[channel][i[0]][0]),timeline[channel][i[0]][1])
+            m=m+"%s [TIMELINE %s ago by %s]" % (i[0],duration(time.time()-timeline[channel][i[0]][0]),timeline[channel][i[0]][1])
     if m == origmsg:
         return
     msg = "<%s> %s" % (user,m)
@@ -191,28 +232,37 @@ def tiny(user,channel,msg):
     atomitems.sort()
     atomitems.reverse()
     atom.generate_atom(channel,atomitems[:30])
-        
+
     return msg
 
 
 if __name__=="__main__":
-    print tiny("me","#channel","http://farm4.static.flickr.com/3185/2544987701_dca251f995.jpg")
-    print tiny("me","#channel","http://www.flickr.com/photos/tonyandrach/2712775977/in/set-72157606435991911")
-    print tiny("me","#channel","http://twitter.com/revgeorge/statuses/884264710")
-    print tiny("me","#channel","http://pr0nbot.phetast.nu/src/242482_I%2527ve%2520seen%2520these%2520guys%2520before-1220080640.jpg")
-    print tiny("me","#channel","http://www.answerbag.com/")
-    sys.exit(1)
-    print tiny("him","#channel","http://twitter.com/revgeorge/statuses/884264710")
-    print tiny("me","#channel","http://en.wikipedia.org/wiki/Puppet_state#The_first_puppet_states")
-    print tiny("me","#channel","http://www.stuff.co.nz/4664076a28.html")
-    print tiny("me","#channel","http://porter.net.nz/~alastair/trace.txt")
-    print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
-    print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
-    print tiny("me","#channel","http://azarask.in/blog/post/not-the-users-fault-manifesto/")
-    print tiny("me","#channel","http://slashdot.org this is a test http://example.org http://www.news.com.au/heraldsun/story/0,21985,23245649-5005961,00.html")
-    print tiny("me","#channel","http://www.syddutyfree.com.au/ShopNowOrJustBrowsing.aspx?returnURL=%2fcategory%2fliquor%2fwhiskeys-and-cognacs%2f12426-glenfiddich-30-year-old-750ml")
-    print tiny("me","#channel","http://foss-means-business.org/Image:IMG_0172.JPG")
-    print tiny("me","#channel","http://en.wikipedia.org/wiki/Main_Page")
-    print tiny("me","#channel","http://www.trademe.co.nz/Home-living/Lifestyle/Wine-food/Food/auction-165301499.htm")
+    if sys.argv[1:] == []:
+        print tiny('me','#channel','http://www.youtube.com/watch?v=pFS4zYWxzNA')
+        print tiny("me","#channel","http://twitter.com/#!/clembastow/status/21798043317698560")
+        print tiny("me","#channel","http://en.wikipedia.org/wiki/Graph_(mathematics)")
+        print tiny("me","#channel","http://github.com/isomer/tinybot/tree/master")
+        print
+        print tiny("me","#channel","http://slashdot.org this is a test http://example.org http://www.news.com.au/heraldsun/story/0,21985,23245649-5005961,00.html")
+        print tiny("me","#channel","http://[::1]/")
+        print tiny("me","#channel","http://limerickdb.com/?347")
+        print tiny("me","#channel","http://twitter.com/revgeorge/statuses/884264710")
+        print tiny("me","#channel","http://pr0nbot.phetast.nu/src/242482_I%2527ve%2520seen%2520these%2520guys%2520before-1220080640.jpg")
+        print tiny("me","#channel","http://www.answerbag.com/")
+        print tiny("him","#channel","http://twitter.com/revgeorge/statuses/884264710")
+        print tiny("me","#channel","http://en.wikipedia.org/wiki/Puppet_state#The_first_puppet_states")
+        print tiny("me","#channel","http://www.stuff.co.nz/4664076a28.html")
+        print tiny("me","#channel","http://www.flickr.com/photos/tonyandrach/2712775977/in/set-72157606435991911")
+        print tiny("me","#channel","http://porter.net.nz/~alastair/trace.txt")
+        print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
+        print tiny("me","#channel","http://pr0nbot.phetast.nu/src/33a44sg-1217237820.jpg")
+        print tiny("me","#channel","http://azarask.in/blog/post/not-the-users-fault-manifesto/")
+        print tiny("me","#channel","http://www.syddutyfree.com.au/ShopNowOrJustBrowsing.aspx?returnURL=%2fcategory%2fliquor%2fwhiskeys-and-cognacs%2f12426-glenfiddich-30-year-old-750ml")
+        print tiny("me","#channel","http://foss-means-business.org/Image:IMG_0172.JPG")
+        print tiny("me","#channel","http://en.wikipedia.org/wiki/Main_Page")
+        print tiny("me","#channel","http://www.trademe.co.nz/Home-living/Lifestyle/Wine-food/Food/auction-165301499.htm")
+    else:
+        for i in sys.argv[1:]:
+            print tiny(os.environ["LOGNAME"],"#cmdline",i)
 
 # vi:et:sw=4:ts=4
