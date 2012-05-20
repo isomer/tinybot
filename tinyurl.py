@@ -9,6 +9,7 @@ import sys
 import urlparse
 import urllib # for urlencode
 import StringIO
+import gzip
 
 import atom
 import websites
@@ -53,6 +54,10 @@ def fetch_url(url):
         n = urllib2.urlopen(u)
     except Exception, e:
         return StringIO.StringIO(str(e))
+    if n.info().get('Content-Encoding') == 'gzip':
+        buf = StringIO.StringIO(n.read())
+        f = gzip.GzipFile(fileobj=buf)
+        n = f
     return n
 
 
