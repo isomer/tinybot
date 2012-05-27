@@ -18,10 +18,11 @@ def get_summary(url, page):
         url = "https://api.twitter.com/1/statuses/show.json?id=%s" % tweetid
         d = urllib2.urlopen(url).read()
         data = json.loads(d)
-        return "%s: %s" % (user, data["text"].encode("ascii", "ignore"))
+        tweet = data["text"]
+        return u"%s: %s" % (user, tweet)
     else:
         u = user[1:]
         url = "https://api.twitter.com/1/users/lookup.json?screen_name=%s" % u
         d = urllib2.urlopen(url).read()
         data = json.loads(d)
-        return "%s: %s" % (user, data[0]["status"]["text"].encode("ascii", "ignore"))
+        return "%s: %s" % (user, data[0]["status"]["text"])

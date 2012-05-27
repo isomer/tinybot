@@ -77,7 +77,8 @@ def get_summary(url, page):
 
 def unhtmlspecialchars(txt):
     "Remove &entities; from HTML"
-    txt = txt.decode("utf8") # turn into a unicode str
+    if isinstance(txt, str):
+        txt = txt.decode("utf8") # turn into a unicode str
     def get_entity_char(match):
         """returns a unicode encoded char string for a given html entity
         (eg '&#167;' -> u'§', '&eacute;' -> u'é') """
